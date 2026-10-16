@@ -16,3 +16,7 @@ Result: **96 / 100** intervals contained the true price.
 
 For a correctly calibrated 95% interval, the expected count is about 95, with a
 standard deviation of roughly 2.2, so this result is consistent with theory
+Plain MC      (100000 paths): price 10.5120, std err 0.0469
+Antithetic MC (50000 pairs): price 10.4520, std err 0.0328
+Std err ratio (antithetic / plain): 0.7002
+Average std err ratio over 20 seeds: 0.7070

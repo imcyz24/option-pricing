@@ -89,7 +89,7 @@ int main() {
     std::cout << "Antithetic MC (" << n_total / 2 << " pairs): price " << av.price
               << ", std err " << av.std_err << "\n";
     std::cout << "Std err ratio (antithetic / plain): " << av.std_err / plain.std_err << "\n";
-    
+
     double ratio_sum = 0.0;
     const unsigned ratio_trials = 20;
     for (unsigned seed = 1; seed <= ratio_trials; ++seed) {
