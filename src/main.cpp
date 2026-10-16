@@ -33,6 +33,26 @@ McResult mc_call(double S, double K, double r, double sigma, double T, int n, un
     double var = (sum_sq - n * mean * mean) / (n - 1);
     return {mean, std::sqrt(var / n)};
 }
+McResult mc_call_av(double S, double K, double r, double sigma, double T, int n_pairs, unsigned seed = 42) {
+    std::mt19937_64 gen(seed);
+    std::normal_distribution<double> N(0.0, 1.0);
+    const double disc = std::exp(-r * T);
+    const double drift = (r - 0.5 * sigma * sigma) * T;
+    const double vol = sigma * std::sqrt(T);
+    double sum = 0.0;
+    double sum_sq = 0.0;
+    for (int i = 0; i < n_pairs; ++i) {
+        double z = N(gen);
+        double up = S * std::exp(drift + vol * z);
+        double down = S * std::exp(drift - vol * z);
+        double y = disc * 0.5 * (std::max(up - K, 0.0) + std::max(down - K, 0.0));
+        sum += y;
+        sum_sq += y * y;
+    }
+    double mean = sum / n_pairs;
+    double var = (sum_sq - n_pairs * mean * mean) / (n_pairs - 1);
+    return {mean, std::sqrt(var / n_pairs)};
+}
 
 int main() {
     const double S = 100, K = 100, r = 0.05, sigma = 0.2, T = 1.0;
@@ -60,4 +80,13 @@ int main() {
     }
     std::cout << "\nCoverage test (n = " << n_test << ", " << trials << " seeds): "
               << hits << " / " << trials << " intervals contain the BS price\n";
-}
+
+    const int n_total = 100000;
+    McResult plain = mc_call(S, K, r, sigma, T, n_total);
+    McResult av = mc_call_av(S, K, r, sigma, T, n_total / 2);
+    std::cout << "\nPlain MC      (" << n_total << " paths): price " << plain.price
+              << ", std err " << plain.std_err << "\n";
+    std::cout << "Antithetic MC (" << n_total / 2 << " pairs): price " << av.price
+              << ", std err " << av.std_err << "\n";
+    std::cout << "Std err ratio (antithetic / plain): " << av.std_err / plain.std_err << "\n";
+ }
