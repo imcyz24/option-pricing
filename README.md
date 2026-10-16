@@ -1,11 +1,15 @@
-| n          | MC price | Std error | 95% CI low | 95% CI high | BS in CI? |
-|-----------:|---------:|----------:|-----------:|------------:|:---------:|
-| 1,000      | 10.7783  | 0.4913    | 9.8152     | 11.7413     | yes       |
-| 10,000     | 10.6298  | 0.1482    | 10.3394    | 10.9202     | yes       |
-| 100,000    | 10.5120  | 0.0469    | 10.4202    | 10.6039     | yes       |
-| 1,000,000  | 10.4723  | 0.0147    | 10.4434    | 10.5013     | yes       |
-| 10,000,000 | 10.4501  | 0.0047    | 10.4410    | 10.4592     | yes       |
+### Delta
 
+| Method                              | Delta  | Std error | 95% CI           |
+|-------------------------------------|-------:|----------:|------------------|
+| Black-Scholes (closed form)         | 0.6368 | -         | -                |
+| MC finite difference (h = 1, 100k)  | 0.6370 | 0.0018    | [0.6335, 0.6406] |
+| MC pathwise (100k)                  | 0.6370 | 0.0018    | [0.6334, 0.6405] |
+
+Both estimators use the same seed, so their results are nearly identical.
+For a call option the finite-difference and pathwise estimators have similar
+variance. Pathwise has no bias from the bump size h and needs only one
+payoff evaluation per path.
 ### Coverage test
 
 To check that the 95% confidence interval is calibrated, I ran 100 independent
