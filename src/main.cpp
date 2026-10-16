@@ -78,6 +78,25 @@ McResult mc_delta_fd(double S, double K, double r, double sigma, double T,
     double var = (sum_sq - n * mean * mean) / (n - 1);
     return {mean, std::sqrt(var / n)};
 }
+McResult mc_delta_pw(double S, double K, double r, double sigma, double T,
+                     int n, unsigned seed = 42) {
+    std::mt19937_64 gen(seed);
+    std::normal_distribution<double> N(0.0, 1.0);
+    const double disc = std::exp(-r * T);
+    const double drift = (r - 0.5 * sigma * sigma) * T;
+    const double vol = sigma * std::sqrt(T);
+    double sum = 0.0;
+    double sum_sq = 0.0;
+    for (int i = 0; i < n; ++i) {
+        double growth = std::exp(drift + vol * N(gen));   // S_T / S
+        double d = (S * growth > K) ? disc * growth : 0.0;
+        sum += d;
+        sum_sq += d * d;
+    }
+    double mean = sum / n;
+    double var = (sum_sq - n * mean * mean) / (n - 1);
+    return {mean, std::sqrt(var / n)};
+}
 
 int main() {
     const double S = 100, K = 100, r = 0.05, sigma = 0.2, T = 1.0;
@@ -134,4 +153,11 @@ int main() {
               << ", std err " << d.std_err
               << ", 95% CI [" << d_lo << ", " << d_hi << "]"
               << ", BS Delta in CI? " << ((bs_d >= d_lo && bs_d <= d_hi) ? "yes" : "no") << "\n";
+              McResult pw = mc_delta_pw(S, K, r, sigma, T, 100000);
+    double pw_lo = pw.price - 1.96 * pw.std_err;
+    double pw_hi = pw.price + 1.96 * pw.std_err;
+    std::cout << "MC Delta (pathwise): " << pw.price
+              << ", std err " << pw.std_err
+              << ", 95% CI [" << pw_lo << ", " << pw_hi << "]"
+              << ", BS Delta in CI? " << ((bs_d >= pw_lo && bs_d <= pw_hi) ? "yes" : "no") << "\n";
 }

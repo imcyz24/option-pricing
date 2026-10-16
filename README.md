@@ -21,3 +21,5 @@ Antithetic MC (50000 pairs): price 10.4520, std err 0.0328
 Std err ratio (antithetic / plain): 0.7002
 Average std err ratio over 20 seeds: 0.7070
 BS Delta: 0.6368
+MC Delta (finite diff, h = 1): 0.6370, std err 0.0018, 95% CI [0.6335, 0.6406], BS Delta in CI? yes
+MC Delta (pathwise): 0.6370, std err 0.0018, 95% CI [0.6334, 0.6405], BS Delta in CI? yes
