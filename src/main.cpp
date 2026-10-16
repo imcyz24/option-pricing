@@ -89,4 +89,14 @@ int main() {
     std::cout << "Antithetic MC (" << n_total / 2 << " pairs): price " << av.price
               << ", std err " << av.std_err << "\n";
     std::cout << "Std err ratio (antithetic / plain): " << av.std_err / plain.std_err << "\n";
- }
+    
+    double ratio_sum = 0.0;
+    const unsigned ratio_trials = 20;
+    for (unsigned seed = 1; seed <= ratio_trials; ++seed) {
+        McResult p = mc_call(S, K, r, sigma, T, n_total, seed);
+        McResult a = mc_call_av(S, K, r, sigma, T, n_total / 2, seed);
+        ratio_sum += a.std_err / p.std_err;
+    }
+    std::cout << "Average std err ratio over " << ratio_trials << " seeds: "
+              << ratio_sum / ratio_trials << "\n";
+}
