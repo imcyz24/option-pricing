@@ -4,6 +4,11 @@
 #include <iostream>
 #include <random>
 
+struct McResult {
+    double price;
+    double std_err;
+};
+
 double norm_cdf(double x) { return 0.5 * std::erfc(-x / std::sqrt(2.0)); }
 
 double bs_call(double S, double K, double r, double sigma, double T) {
@@ -12,15 +17,21 @@ double bs_call(double S, double K, double r, double sigma, double T) {
     return S * norm_cdf(d1) - K * std::exp(-r * T) * norm_cdf(d2);
 }
 
-double mc_call(double S, double K, double r, double sigma, double T, int n, unsigned seed = 42) {
+McResult mc_call(double S, double K, double r, double sigma, double T, int n, unsigned seed = 42) {
     std::mt19937_64 gen(seed);
     std::normal_distribution<double> N(0.0, 1.0);
+    const double disc = std::exp(-r * T);
     double sum = 0.0;
+    double sum_sq = 0.0;
     for (int i = 0; i < n; ++i) {
         double ST = S * std::exp((r - 0.5 * sigma * sigma) * T + sigma * std::sqrt(T) * N(gen));
-        sum += std::max(ST - K, 0.0);
+        double payoff = disc * std::max(ST - K, 0.0);
+        sum += payoff;
+        sum_sq += payoff * payoff;
     }
-    return std::exp(-r * T) * sum / n;
+    double mean = sum / n;
+    double var = (sum_sq - n * mean * mean) / (n - 1);
+    return {mean, std::sqrt(var / n)};
 }
 
 int main() {
@@ -29,9 +40,14 @@ int main() {
 
     std::cout << std::fixed << std::setprecision(4);
     std::cout << "Black-Scholes: " << exact << "\n\n";
-    std::cout << "n        MC price   abs error\n";
+    std::cout << "n          MC price   std err   95% CI low  95% CI high  BS in CI?\n";
     for (int n = 1000; n <= 10000000; n *= 10) {
-        double mc = mc_call(S, K, r, sigma, T, n);
-        std::cout << std::setw(8) << n << " " << mc << "   " << std::abs(mc - exact) << "\n";
+        McResult mc = mc_call(S, K, r, sigma, T, n);
+        double lo = mc.price - 1.96 * mc.std_err;
+        double hi = mc.price + 1.96 * mc.std_err;
+        bool inside = (exact >= lo && exact <= hi);
+        std::cout << std::setw(10) << n << " " << mc.price << "   " << mc.std_err
+                  << "   " << lo << "      " << hi << "      "
+                  << (inside ? "yes" : "no") << "\n";
     }
 }

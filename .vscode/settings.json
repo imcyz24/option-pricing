@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "/Users/ggyy/projects/option-pricing/src"
+    "cmake.sourceDirectory": "/Users/ggyy/projects/option-pricing/src",
+    "C_Cpp.errorSquiggles": "disabled"
 }
