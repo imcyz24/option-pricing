@@ -20,3 +20,4 @@ Plain MC      (100000 paths): price 10.5120, std err 0.0469
 Antithetic MC (50000 pairs): price 10.4520, std err 0.0328
 Std err ratio (antithetic / plain): 0.7002
 Average std err ratio over 20 seeds: 0.7070
+BS Delta: 0.6368

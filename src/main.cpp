@@ -16,6 +16,10 @@ double bs_call(double S, double K, double r, double sigma, double T) {
     double d2 = d1 - sigma * std::sqrt(T);
     return S * norm_cdf(d1) - K * std::exp(-r * T) * norm_cdf(d2);
 }
+double bs_delta(double S, double K, double r, double sigma, double T) {
+    double d1 = (std::log(S / K) + (r + 0.5 * sigma * sigma) * T) / (sigma * std::sqrt(T));
+    return norm_cdf(d1);
+}
 
 McResult mc_call(double S, double K, double r, double sigma, double T, int n, unsigned seed = 42) {
     std::mt19937_64 gen(seed);
@@ -52,6 +56,27 @@ McResult mc_call_av(double S, double K, double r, double sigma, double T, int n_
     double mean = sum / n_pairs;
     double var = (sum_sq - n_pairs * mean * mean) / (n_pairs - 1);
     return {mean, std::sqrt(var / n_pairs)};
+}
+McResult mc_delta_fd(double S, double K, double r, double sigma, double T,
+                     int n, double h, unsigned seed = 42) {
+    std::mt19937_64 gen(seed);
+    std::normal_distribution<double> N(0.0, 1.0);
+    const double disc = std::exp(-r * T);
+    const double drift = (r - 0.5 * sigma * sigma) * T;
+    const double vol = sigma * std::sqrt(T);
+    double sum = 0.0;
+    double sum_sq = 0.0;
+    for (int i = 0; i < n; ++i) {
+        double growth = std::exp(drift + vol * N(gen));  // same Z for both bumps
+        double up   = std::max((S + h) * growth - K, 0.0);
+        double down = std::max((S - h) * growth - K, 0.0);
+        double d = disc * (up - down) / (2.0 * h);
+        sum += d;
+        sum_sq += d * d;
+    }
+    double mean = sum / n;
+    double var = (sum_sq - n * mean * mean) / (n - 1);
+    return {mean, std::sqrt(var / n)};
 }
 
 int main() {
@@ -99,4 +124,14 @@ int main() {
     }
     std::cout << "Average std err ratio over " << ratio_trials << " seeds: "
               << ratio_sum / ratio_trials << "\n";
+              // Is the variance reduction stable across seeds?
+ std::cout << "\nBS Delta: " << bs_delta(S, K, r, sigma, T) << "\n";
+ McResult d = mc_delta_fd(S, K, r, sigma, T, 100000, 1.0);
+    double bs_d = bs_delta(S, K, r, sigma, T);
+    double d_lo = d.price - 1.96 * d.std_err;
+    double d_hi = d.price + 1.96 * d.std_err;
+    std::cout << "MC Delta (finite diff, h = 1): " << d.price
+              << ", std err " << d.std_err
+              << ", 95% CI [" << d_lo << ", " << d_hi << "]"
+              << ", BS Delta in CI? " << ((bs_d >= d_lo && bs_d <= d_hi) ? "yes" : "no") << "\n";
 }
