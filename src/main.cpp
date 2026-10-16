@@ -37,7 +37,6 @@ McResult mc_call(double S, double K, double r, double sigma, double T, int n, un
 int main() {
     const double S = 100, K = 100, r = 0.05, sigma = 0.2, T = 1.0;
     const double exact = bs_call(S, K, r, sigma, T);
-
     std::cout << std::fixed << std::setprecision(4);
     std::cout << "Black-Scholes: " << exact << "\n\n";
     std::cout << "n          MC price   std err   95% CI low  95% CI high  BS in CI?\n";
@@ -50,4 +49,15 @@ int main() {
                   << "   " << lo << "      " << hi << "      "
                   << (inside ? "yes" : "no") << "\n";
     }
+    const int n_test = 10000;
+    const unsigned trials = 100;
+    int hits = 0;
+    for (unsigned seed = 1; seed <= trials; ++seed) {
+        McResult mc = mc_call(S, K, r, sigma, T, n_test, seed);
+        double lo = mc.price - 1.96 * mc.std_err;
+        double hi = mc.price + 1.96 * mc.std_err;
+        if (exact >= lo && exact <= hi) ++hits;
+    }
+    std::cout << "\nCoverage test (n = " << n_test << ", " << trials << " seeds): "
+              << hits << " / " << trials << " intervals contain the BS price\n";
 }
