@@ -7,5 +7,6 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-add_executable(option_pricing src/main.cpp)
+add_executable(option_pricing src/main.cpp src/pricing.cpp)
+target_include_directories(option_pricing PRIVATE include)
 target_compile_options(option_pricing PRIVATE -Wall -Wextra)
