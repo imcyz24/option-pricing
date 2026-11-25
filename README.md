@@ -36,9 +36,15 @@ MC Delta (pathwise): 0.6370, std err 0.0018, 95% CI [0.6334, 0.6405], BS Delta i
 
 ## Tests
 
+
     cmake -S . -B build
     cmake --build build
     ./build/pricing_tests
+
+ ## Usage
+
+    ./build/price S K r sigma T
+    ./build/price 100 105 0.05 0.2 0.5
 
 Six GoogleTest cases cover:
 
