@@ -25,3 +25,6 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 add_executable(pricing_tests tests/test_pricing.cpp)
 target_link_libraries(pricing_tests PRIVATE pricing GTest::gtest_main)
+
+add_executable(price tools/price.cpp)
+target_link_libraries(price PRIVATE pricing)
