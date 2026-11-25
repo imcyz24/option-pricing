@@ -32,3 +32,16 @@ MC Delta (pathwise): 0.6370, std err 0.0018, 95% CI [0.6334, 0.6405], BS Delta i
     include/pricing.hpp   Function declarations and McResult
     src/pricing.cpp       Black-Scholes, Monte Carlo, antithetic, delta estimators
     src/main.cpp          Runs experiments and prints results
+    tests/test_pricing.cpp  GoogleTest unit tests
+    ## Tests
+
+    cmake -S . -B build
+    cmake --build build
+    ./build/pricing_tests
+
+Six GoogleTest cases cover:
+- Black-Scholes call, put and delta against reference values
+- Put-call parity across 9 strike/volatility combinations
+- Monte Carlo prices (plain and antithetic) within 4 standard errors of the closed form
+- Antithetic variates reduce the standard error
+- Finite-difference and pathwise delta within 4 standard errors of the closed form
