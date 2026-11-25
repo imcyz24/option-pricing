@@ -7,6 +7,7 @@ struct McResult {
 
 double norm_cdf(double x);
 double bs_call(double S, double K, double r, double sigma, double T);
+double bs_put(double S, double K, double r, double sigma, double T);
 double bs_delta(double S, double K, double r, double sigma, double T);
 
 McResult mc_call(double S, double K, double r, double sigma, double T,

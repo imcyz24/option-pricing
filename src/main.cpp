@@ -1,6 +1,6 @@
 #include <iomanip>
 #include <iostream>
-
+#include <cmath>
 #include "pricing.hpp"
 
 int main() {
@@ -18,6 +18,11 @@ int main() {
         std::cout << std::setw(10) << n << " " << mc.price << "   " << mc.std_err
                   << "   " << lo << "      " << hi << "      "
                   << (inside ? "yes" : "no") << "\n";
+                  // Put price and put-call parity check
+    const double put = bs_put(S, K, r, sigma, T);
+    const double parity_gap = (exact - put) - (S - K * std::exp(-r * T));
+    std::cout << "\nBS Put: " << put << "\n";
+    std::cout << "Put-call parity gap (C - P - (S - K e^-rT)): " << parity_gap << "\n";
     }
 
     // Coverage test: how often does the 95% CI contain the true price?
