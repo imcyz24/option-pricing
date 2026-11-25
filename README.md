@@ -53,3 +53,11 @@ Six GoogleTest cases cover:
 - Monte Carlo prices (plain and antithetic) within 4 standard errors of the closed form
 - Antithetic variates reduce the standard error
 - Finite-difference and pathwise delta within 4 standard errors of the closed form
+
+## Limitations
+
+- European options only; no early exercise (American) or path-dependent payoffs
+- Constant volatility and interest rate; no volatility smile or term structure
+- No dividends
+- Uses theoretical inputs, not market data, so it is a pricing and validation tool, not a trading strategy
+- Monte Carlo results depend on the seed; tests use fixed seeds for reproducibility
